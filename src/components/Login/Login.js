@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from './firebase.config';
 import { useState } from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider,createUserWithEmailAndPassword,signInWithEmailAndPassword,updateProfile } from "firebase/auth";
+import { UserContext } from '../../App';
+import { useHistory, useLocation } from 'react-router-dom';
 const app = initializeApp(firebaseConfig);
 
 
@@ -17,13 +19,20 @@ const [newUser,setNewUser]=useState(false);
     password:'',
     photo:'',
     error:''
-  })
+  });
+
+  const [loggedInUser,setLoggedInUser] = useContext(UserContext);
   // console.log(user)
   // Google Sign IN
+  const history = useHistory();
+  const location = useLocation();
+  
+  let { from } = location.state || { from: { pathname: "/" } };
+
+  
+  // Facebook Sign In
   const provider = new GoogleAuthProvider();
   const auth = getAuth();
-  // Facebook Sign In
-
 
 
 
@@ -132,10 +141,15 @@ const handleSubmit = (e)=>{
   if(!newUser && user.email && user.password){
     signInWithEmailAndPassword(auth,user.email, user.password)
   .then(res=>{
-    const newUserInfo = {...user};
+    const newUserInfo = {...res.user};
+    console.log(res.user)
       newUserInfo.error = '';
       newUserInfo.success= true;
       setUser(newUserInfo);
+      const {displayName, email} = res.user;
+            const signInUser = {name: displayName, email};
+            setLoggedInUser(signInUser);
+      history.replace(from);
       console.log('sign in user info',res.user)
   })
   .catch((error) => {

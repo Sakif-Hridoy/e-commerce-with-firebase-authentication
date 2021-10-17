@@ -14,13 +14,17 @@ import { initializeApp } from "firebase/app";
 import firebaseConfig from './components/Login/firebase.config';
 import Shipment from './components/Shipment/Shipment';
 import Login from './components/Login/Login';
+import { createContext, useState } from 'react';
+import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 const app = initializeApp(firebaseConfig);
 
-
+export const UserContext = createContext();
 
 function App() {
+  const [loggedInUser,setLoggedInUser] = useState({})
   return (
-    <div>
+    <UserContext.Provider value = {[loggedInUser, setLoggedInUser]}>
+      <h3>login email:{loggedInUser.email}</h3>
       <Header></Header>
       <Router>
         <Switch>
@@ -30,15 +34,15 @@ function App() {
           <Route path="/review">
           <Review></Review>
           </Route>
-          <Route path="/inventory">
+          <PrivateRoute path="/inventory">
           <Inventory></Inventory>
-          </Route>
+          </PrivateRoute>
           <Route path="/login">
           <Login></Login>
           </Route>
-          <Route path="/shipment">
+          <PrivateRoute path="/shipment">
           <Shipment></Shipment>
-          </Route>
+          </PrivateRoute>
           <Route exact path="/">
           <Shop></Shop>
           </Route>
@@ -52,7 +56,7 @@ function App() {
       </Router>
       
       
-    </div>
+    </UserContext.Provider>
   );
 }
 
